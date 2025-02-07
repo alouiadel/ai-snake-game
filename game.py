@@ -10,6 +10,7 @@ from constants import (
     TEXT_COLOR,
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
+    BACKGROUND,
 )
 
 
@@ -41,3 +42,16 @@ def draw_play_again_prompt(screen, font, snake):
     screen.blit(game_over_text, game_over_rect)
     screen.blit(score_text, score_rect)
     screen.blit(prompt_text, prompt_rect)
+
+
+def draw_main_menu(screen, font):
+    screen.fill(BACKGROUND)
+
+    play_text = font.render("1. Play Game", True, TEXT_COLOR)
+    quit_text = font.render("2. Quit", True, TEXT_COLOR)
+
+    play_rect = play_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+    quit_rect = quit_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40))
+
+    screen.blit(play_text, play_rect)
+    screen.blit(quit_text, quit_rect)
