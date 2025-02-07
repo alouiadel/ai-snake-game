@@ -8,7 +8,7 @@ class Snake:
         self.positions = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
         self.direction = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0)])
         self.color = SNAKE_COLOR
-        self.score = 0
+        self.score = 1
         self.growth_pending = False
 
     def get_head_position(self):
@@ -36,4 +36,4 @@ class Snake:
     def grow(self):
         self.growth_pending = True
         self.length += 1
-        self.score += 10
+        self.score = self.length
