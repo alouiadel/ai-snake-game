@@ -1,3 +1,5 @@
+"""Main entry point for the AI Snake Game with training capabilities."""
+
 import os
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
@@ -19,24 +21,35 @@ import threading
 import queue
 import time
 
+# Initialize Pygame and mixer
 pygame.init()
 mixer.init()
 
+# Global training state
 training_queue = queue.Queue()
 training_status = {"running": False, "progress": 0, "metrics": None}
 
 
 def training_worker(ai_trainer, episodes, training_status):
+    """Background worker function for AI training.
+
+    Args:
+        ai_trainer: AITrainer instance
+        episodes: Number of training episodes to run
+        training_status: Shared dictionary for progress tracking
+    """
     for episode in range(episodes):
         if not training_status["running"]:
             break
 
+        # Initialize episode
         snake = Snake()
         food = Food()
         steps = 0
         max_steps = 1000
         game_over = False
 
+        # Run episode
         while not game_over and steps < max_steps:
             state = ai_trainer.get_state(snake, food)
             action = ai_trainer.get_action(state)
@@ -53,18 +66,20 @@ def training_worker(ai_trainer, episodes, training_status):
                 snake.grow()
                 food.randomize_position()
 
+            # Store experience and train
             ai_trainer.remember(state, action, reward, new_state, game_over)
             ai_trainer.train_step()
             steps += 1
 
+        # Update training progress
         ai_trainer.update_target_network(episode)
         ai_trainer.update_metrics(snake.length)
-
         training_status["progress"] = (episode + 1) / episodes
         training_status["metrics"] = ai_trainer.get_metrics()
 
-        time.sleep(0.001)
+        time.sleep(0.001)  # Prevent CPU overload
 
+    # Save final model
     ai_trainer.save_model()
     ai_trainer.model.eval()
     ai_trainer.target_model.load_state_dict(ai_trainer.model.state_dict())
@@ -72,19 +87,24 @@ def training_worker(ai_trainer, episodes, training_status):
 
 
 def check_model_exists():
+    """Check if a trained model exists on disk."""
     model_path = os.path.join("models", "latest_model.pth")
     metadata_path = os.path.join("models", "latest_metadata.pt")
     return os.path.exists(model_path) and os.path.exists(metadata_path)
 
 
 def main():
+    """Main game loop handling menu, gameplay, and AI interactions."""
+    # Initialize display and game settings
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("AI Snake Game")
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 36)
 
+    # Enable responsive controls
     pygame.key.set_repeat(150, 50)
 
+    # Initialize AI components
     ai_trainer = AITrainer()
     model_exists = check_model_exists()
     if model_exists:
@@ -94,6 +114,7 @@ def main():
             print(f"Error loading model: {e}")
             model_exists = False
 
+    # Game state variables
     in_menu = True
     in_training_prompt = False
     training = False
@@ -109,7 +130,9 @@ def main():
     move_delay = base_move_delay
     training_thread = None
 
+    # Main game loop
     while True:
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 if training_status["running"]:
@@ -119,21 +142,22 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if in_menu:
-                    if event.key == pygame.K_1:
+                    if event.key == pygame.K_1:  # Play game
                         in_menu = False
                         snake = Snake()
                         food = Food()
-                    elif event.key == pygame.K_2:
+                    elif event.key == pygame.K_2:  # Train AI
                         in_training_prompt = True
                         in_menu = False
-                    elif event.key == pygame.K_3 and model_exists:
+                    elif event.key == pygame.K_3 and model_exists:  # Watch AI
                         in_menu = False
                         watching_ai = True
                         snake = Snake()
                         food = Food()
+                        # Set AI to evaluation mode
                         ai_trainer.model.eval()
                         ai_trainer.epsilon = 0
-                    elif event.key == pygame.K_4:
+                    elif event.key == pygame.K_4:  # Quit
                         pygame.quit()
                         sys.exit()
                 elif in_training_prompt:
@@ -141,6 +165,7 @@ def main():
                         episodes = max(1, min(1000, int(input_text)))
                         training = True
                         in_training_prompt = False
+                        # Start training in background
                         training_status["running"] = True
                         training_status["progress"] = 0
                         training_thread = threading.Thread(
@@ -152,7 +177,7 @@ def main():
                         input_text = input_text[:-1]
                     elif event.unicode.isnumeric():
                         input_text += event.unicode
-                elif not game_over:
+                elif not game_over:  # Handle game controls
                     if event.key == pygame.K_UP:
                         snake.turn((0, -1))
                     elif event.key == pygame.K_DOWN:
@@ -161,18 +186,21 @@ def main():
                         snake.turn((-1, 0))
                     elif event.key == pygame.K_RIGHT:
                         snake.turn((1, 0))
-                elif waiting_for_input:
-                    if event.key == pygame.K_y:
+                elif waiting_for_input:  # Handle game over input
+                    if event.key == pygame.K_y:  # Restart game
                         snake = Snake()
                         food = Food()
                         game_over = False
                         waiting_for_input = False
-                    elif event.key == pygame.K_n:
+                    elif event.key == pygame.K_n:  # Return to menu
                         in_menu = True
                         game_over = False
                         waiting_for_input = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            elif (
+                event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
+            ):  # Mouse input
                 if in_menu:
+                    # Handle menu item clicks
                     start_y = SCREEN_HEIGHT / 2 - 40
                     spacing = 60
                     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -181,24 +209,26 @@ def main():
                         for i in range(4):
                             item_y = start_y + (i * spacing)
                             if item_y - 15 <= mouse_y <= item_y + 15:
-                                if i == 0:
+                                if i == 0:  # Play game
                                     in_menu = False
                                     snake = Snake()
                                     food = Food()
-                                elif i == 1:
+                                elif i == 1:  # Train AI
                                     in_training_prompt = True
                                     in_menu = False
-                                elif i == 2 and model_exists:
+                                elif i == 2 and model_exists:  # Watch AI
                                     in_menu = False
                                     watching_ai = True
                                     snake = Snake()
                                     food = Food()
-                                elif i == 3:
+                                elif i == 3:  # Quit
                                     pygame.quit()
                                     sys.exit()
 
+        # Clear screen
         screen.fill(BACKGROUND)
 
+        # Render current game state
         if in_menu:
             draw_main_menu(screen, font, model_exists)
         elif in_training_prompt:
@@ -223,6 +253,7 @@ def main():
             if not game_over:
                 current_time = pygame.time.get_ticks()
                 if current_time - last_move_time >= move_delay:
+                    # Get AI decision and move
                     state = ai_trainer.get_state(snake, food)
                     action = ai_trainer.get_action(state)
                     directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -239,6 +270,7 @@ def main():
                     food.randomize_position()
                     move_delay = max(50, base_move_delay - (snake.score * 1.5))
 
+            # Draw game elements
             draw_grid(screen)
             food_rect = pygame.Rect(
                 food.position[0] * CELL_SIZE,
@@ -259,7 +291,7 @@ def main():
 
             if game_over and waiting_for_input:
                 draw_play_again_prompt(screen, font, snake)
-        else:
+        else:  # Player game mode
             if not game_over:
                 current_time = pygame.time.get_ticks()
                 if current_time - last_move_time >= move_delay:
@@ -273,6 +305,7 @@ def main():
                     food.randomize_position()
                     move_delay = max(50, base_move_delay - (snake.score * 1.5))
 
+            # Draw game elements
             screen.fill(BACKGROUND)
             draw_grid(screen)
 
@@ -296,8 +329,9 @@ def main():
             if game_over and waiting_for_input:
                 draw_play_again_prompt(screen, font, snake)
 
+        # Update display
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(60)  # Maintain 60 FPS
 
 
 if __name__ == "__main__":
