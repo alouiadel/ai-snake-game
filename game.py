@@ -48,31 +48,43 @@ def draw_play_again_prompt(screen, font, snake):
 def draw_main_menu(screen, font, model_exists=False):
     screen.fill(BACKGROUND)
 
-    title_text = font.render("AI Snake Game", True, TEXT_COLOR)
-    play_text = font.render("1. Play Game", True, TEXT_COLOR)
-    train_text = font.render("2. Train AI", True, TEXT_COLOR)
-    watch_text = font.render("3. Watch AI Play", True, TEXT_COLOR)
-    quit_text = font.render("4. Quit", True, TEXT_COLOR)
+    title_font = pygame.font.Font(None, 72)
+    shadow_text = title_font.render("AI Snake Game", True, (30, 30, 30))
+    title_text = title_font.render("AI Snake Game", True, TEXT_COLOR)
 
     title_rect = title_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4))
-    play_rect = play_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 40))
-    train_rect = train_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
-    watch_rect = watch_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40))
-    quit_rect = quit_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 80))
+    shadow_rect = shadow_text.get_rect(
+        center=(SCREEN_WIDTH / 2 + 2, SCREEN_HEIGHT / 4 + 2)
+    )
 
+    screen.blit(shadow_text, shadow_rect)
     screen.blit(title_text, title_rect)
-    screen.blit(play_text, play_rect)
-    screen.blit(train_text, train_rect)
 
-    if model_exists:
-        screen.blit(watch_text, watch_rect)
-    else:
-        screen.blit(
-            font.render("3. Watch AI Play (No model yet)", True, (128, 128, 128)),
-            watch_rect,
-        )
+    menu_items = [
+        ("1. Play Game", True),
+        ("2. Train AI", True),
+        ("3. Watch AI Play", model_exists),
+        ("4. Quit", True),
+    ]
 
-    screen.blit(quit_text, quit_rect)
+    spacing = 60
+    start_y = SCREEN_HEIGHT / 2 - 40
+
+    mouse_pos = pygame.mouse.get_pos()
+
+    for i, (text, enabled) in enumerate(menu_items):
+        y_pos = start_y + (i * spacing)
+        color = TEXT_COLOR if enabled else (128, 128, 128)
+
+        menu_text = font.render(text, True, color)
+        text_rect = menu_text.get_rect(center=(SCREEN_WIDTH / 2, y_pos))
+
+        if enabled and text_rect.collidepoint(mouse_pos):
+            indicator_rect = text_rect.inflate(20, 10)
+            pygame.draw.rect(screen, (60, 60, 60), indicator_rect, border_radius=5)
+            menu_text = font.render(text, True, (255, 255, 255))
+
+        screen.blit(menu_text, text_rect)
 
 
 def draw_training_prompt(screen, font):
