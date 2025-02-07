@@ -9,7 +9,7 @@ A classic Snake game built with Python and Pygame.
 
 ## 🚀 Quick Start
 ```bash
-python snake-game.py
+python snake-game-entry.py
 ```
 
 ## 🎯 Controls
