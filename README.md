@@ -2,6 +2,8 @@
 
 A classic Snake game built with Python and Pygame, enhanced with AI capabilities using PyTorch.
 
+![AI Snake Game Demo](snake.gif)
+
 ## 🛠️ Setup Instructions
 
 ### Clone the Repository
