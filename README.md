@@ -8,7 +8,7 @@ A classic Snake game built with Python and Pygame, enhanced with AI capabilities
 
 ### Clone the Repository
 ```bash
-git clone https://gitlab.com/alouiadel/ai-snake-game.git
+git clone https://github.com/alouiadel/ai-snake-game.git
 cd ai-snake-game
 ```
 
