@@ -10,14 +10,16 @@ This project features a complete Snake game with a main menu, manual play mode, 
 
 ### Project Structure
 
-| Module                | Purpose                                                                         |
-| --------------------- | ------------------------------------------------------------------------------- |
-| `snake-game-entry.py` | Main entry point, game loop, menu system, game state machine                    |
-| `snake.py`            | Snake class with movement, growth, wrapping, and collision logic                |
-| `food.py`             | Food class with random positioning                                              |
-| `game.py`             | Pygame rendering functions (grid, menu, training progress, game over)           |
-| `ai_trainer.py`       | Deep Q-Learning agent with neural network, training loop, and model persistence |
-| `constants.py`        | Configuration constants (colors, grid dimensions, cell size)                    |
+| Module / Path              | Purpose                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `snake-game-entry.py`      | Main entry point, game loop, menu system, game state machine                    |
+| `snake_game/`              | Package containing game modules                                                 |
+| `snake_game/snake.py`      | Snake class with movement, growth, wrapping, and collision logic                |
+| `snake_game/food.py`       | Food class with random positioning                                              |
+| `snake_game/game.py`       | Pygame rendering functions (grid, menu, training progress, game over)           |
+| `snake_game/ai_trainer.py` | Deep Q-Learning agent with neural network, training loop, and model persistence |
+| `snake_game/constants.py`  | Configuration constants (colors, grid dimensions, cell size)                    |
+| `models/`                  | Directory for trained AI models (not tracked in git)                            |
 
 ## Game Features
 

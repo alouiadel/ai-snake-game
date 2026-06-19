@@ -6,17 +6,23 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 import sys
 from pygame import mixer
-from constants import BACKGROUND, CELL_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_COLOR
-from snake import Snake
-from food import Food
-from game import (
+from snake_game.constants import (
+    BACKGROUND,
+    CELL_SIZE,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    TEXT_COLOR,
+)
+from snake_game.snake import Snake
+from snake_game.food import Food
+from snake_game.game import (
     draw_grid,
     draw_play_again_prompt,
     draw_main_menu,
     draw_training_prompt,
     draw_training_progress,
 )
-from ai_trainer import AITrainer
+from snake_game.ai_trainer import AITrainer
 import threading
 import queue
 import time
